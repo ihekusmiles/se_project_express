@@ -27,7 +27,7 @@ const clothingItemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
   },
   // The square brackets [] make it an array that can hold multiple ObjectIds.
-  //"reference to the user model" - Each ID points to a User
+  // "reference to the user model" - Each ID points to a User
   likes: {
     type: [
       {

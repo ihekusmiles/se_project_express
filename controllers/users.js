@@ -6,7 +6,7 @@ const {
 } = require("../utils/errors");
 
 // controller functions/methods or Route handlers:
-//find()
+// find()
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
@@ -27,7 +27,8 @@ module.exports.getUser = (req, res) => {
       if (err.name === "DocumentNotFoundError") {
         // When a valid ObjectId doesn't exist in the database
         return res.status(NOT_FOUND).send({ message: err.message });
-      } else if (err.name === "CastError") {
+      }
+      if (err.name === "CastError") {
         // When an invalid ObjectId format is provided
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
