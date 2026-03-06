@@ -32,7 +32,7 @@ module.exports.createItem = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
-      return res.status(INTERNAL_SERVER_ERROR).SEND({ message: err.message });
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
 
@@ -65,6 +65,48 @@ module.exports.deleteItem = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
       // For all other errors do default server error
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+    });
+};
+
+// Like an item
+module.exports.likeItem = (req, res) => {
+  const id = req.params.itemId;
+  ClothingItem.findByIdAndUpdate(
+    id,
+    { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
+    { new: true }
+  )
+    .orFail()
+    .then((like) => res.status(200).send({ like }))
+    .catch((err) => {
+      console.error(err); // Log error to terminal
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: err.message });
+      } else if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: err.message });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+    });
+};
+
+// Dislike an item
+module.exports.dislikeItem = (req, res) => {
+  const id = req.params.itemId;
+  ClothingItem.findByIdAndUpdate(
+    id,
+    { $pull: { likes: req.user._id } }, // remove _id from the array
+    { new: true }
+  )
+    .orFail()
+    .then((dislike) => res.status(200).send({ dislike }))
+    .catch((err) => {
+      console.error(err); // Log error to terminal
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: err.message });
+      } else if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: err.message });
+      }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
     });
 };
