@@ -12,7 +12,9 @@ module.exports.getUsers = (req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err); // Log error to terminal
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -26,13 +28,19 @@ module.exports.getUser = (req, res) => {
       console.error(err); // Log error to terminal
       if (err.name === "DocumentNotFoundError") {
         // When a valid ObjectId doesn't exist in the database
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "Id not found in database" });
       }
       if (err.name === "CastError") {
         // When an invalid ObjectId format is provided
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid Id format request" });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
       // Default server error
     });
 };
@@ -45,8 +53,10 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       console.error(err); // Log error to terminal
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({ message: "Validation failed" });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
     });
 };

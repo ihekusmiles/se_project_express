@@ -5,7 +5,7 @@ const clothingItemSchema = new mongoose.Schema({
   name: {
     type: String,
     minlength: 2,
-    maxlength: 32,
+    maxlength: 30,
     required: true,
   },
   weather: {
@@ -25,6 +25,8 @@ const clothingItemSchema = new mongoose.Schema({
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
   },
   // The square brackets [] make it an array that can hold multiple ObjectIds.
   // "reference to the user model" - Each ID points to a User
@@ -32,12 +34,12 @@ const clothingItemSchema = new mongoose.Schema({
     type: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "user",
       },
     ],
     default: [],
   },
-  createAt: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },
