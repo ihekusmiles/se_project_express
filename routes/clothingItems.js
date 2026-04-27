@@ -7,6 +7,8 @@ const {
   dislikeItem,
 } = require("../controllers/clothingItems");
 
+// To manage data in a database or API
+//CRUD: CREATE, READ, UPDATE, DELETE
 // Existing clothing item routes
 // CREATE
 router.post("/", createItem);

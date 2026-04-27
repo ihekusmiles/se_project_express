@@ -1,9 +1,14 @@
 const User = require("../models/user");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
+  CONFLICT_ERROR,
+  UNAUTHORIZED_ERROR,
 } = require("../utils/errors");
+const JWT_SECRET = require("../utils/config");
 
 // controller functions/methods or Route handlers:
 // find()
@@ -47,16 +52,55 @@ module.exports.getUser = (req, res) => {
 
 // create()
 module.exports.createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  User.create({ name, avatar })
-    .then((user) => res.status(201).send({ user }))
+  const { name, avatar, email, password } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) =>
+      User.create({ name, avatar, email, password: hash })
+        .then((user) => res.status(201).send({ user }))
+        .catch((err) => {
+          console.error(err); // Log error to terminal
+          if (err.code === 11000) {
+            return res
+              .status(CONFLICT_ERROR)
+              .send({ message: "Email conflict error" });
+          }
+          if (err.name === "ValidationError") {
+            return res
+              .status(BAD_REQUEST)
+              .send({ message: "Validation failed" });
+          }
+          return res
+            .status(INTERNAL_SERVER_ERROR)
+            .send({ message: "An error has occurred on the server." });
+        })
+    )
     .catch((err) => {
-      console.error(err); // Log error to terminal
-      if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Validation failed" });
-      }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      res.status(BAD_REQUEST).send(err);
+    });
+};
+
+// Login
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  // Using custom method to authenticate
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        {
+          _id: user._id,
+        },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      // authentication successful
+      res.send({ token });
+    })
+    .catch((err) => {
+      // authentication error
+      res
+        .status(UNAUTHORIZED_ERROR)
+        .send({ message: "An authentication error on the server." });
     });
 };
