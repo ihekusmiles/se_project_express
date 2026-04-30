@@ -1,13 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const mainRouter = require("./routes/index");
 const cors = require("cors");
+const mainRouter = require("./routes/index");
 
 const app = express();
 const PORT = 3001;
 
 // Remember that CORS blocks unauthorized origins immediately
-app.use(cors()); //CORS middleware should be placed first.
+app.use(cors()); // CORS middleware should be placed first.
 app.use(express.json()); // Parse the request body second.
 app.use("/", mainRouter); // Route to the right handler last.
 

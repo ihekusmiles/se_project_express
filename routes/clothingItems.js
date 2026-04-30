@@ -9,7 +9,7 @@ const {
 const auth = require("../middlewares/auth");
 
 // To manage data in a database or API
-//CRUD: CREATE, READ, UPDATE, DELETE
+// CRUD: CREATE, READ, UPDATE, DELETE
 // Existing clothing item routes
 // CREATE
 router.post("/", auth, createItem);

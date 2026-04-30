@@ -1,12 +1,11 @@
-const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   CONFLICT_ERROR,
-  UNAUTHORIZED_ERROR,
 } = require("../utils/errors");
 const JWT_SECRET = require("../utils/config");
 
@@ -101,7 +100,7 @@ module.exports.login = (req, res) => {
       // authentication successful
       res.send({ token });
     })
-    .catch((err) => {
+    .catch(() => {
       // authentication error
       res
         .status(BAD_REQUEST)

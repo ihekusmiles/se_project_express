@@ -4,8 +4,6 @@ const itemRouter = require("./clothingItems");
 const { login, createUser } = require("../controllers/users");
 const { NOT_FOUND } = require("../utils/errors");
 
-const express = require("express");
-
 // To be specific about each type of router:
 router.use("/users", userRouter);
 router.use("/items", itemRouter);
