@@ -51,7 +51,7 @@ module.exports.deleteItem = (req, res) => {
       // User owns the item, proceed with deletion
       return ClothingItem.findByIdAndDelete(itemId).then(() => {
         res.status(200).send({
-          message: "Item has been successfully deteted",
+          message: "Item has been successfully deleted",
         });
       });
     })

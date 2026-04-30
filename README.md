@@ -4,11 +4,17 @@ A RESTful API backend for a weather-based clothing recommendation application. T
 
 ## Overview
 
+- Project Pitch Video
 - Running the Project
 - Project description
 - Project purpose
 - Technologies used
 - Key learning objectives
+
+## Project Pitch Video
+
+Check out [this video](https://www.loom.com/share/de41513c51ce47448b8de861cd8599af), where I describe my
+project, the steps I took to build the backend of the WTRW app, a challenge I faced while building it, and the lessons I learned from it.
 
 ## Running the Project
 
@@ -41,17 +47,26 @@ Express.js backend serves as the foundation for the WTWR application providing:
 - **MongoDB** - NoSQL database for flexible data storage
 - **Mongoose** - Object Document Mapper (ODM) for MongoDB
 
+### Authentication & Security:
+
+- **bcryptjs** - Password hashing and encryption
+- **jsonwebtoken (JWT)** - Token-based authentication
+- **CORS** - Cross-Oring Resource Sharing configuration
+
 ### Development Tools:
 
 - **ESLint** - Code linting with Airbnb style guide
 - **Prettier** - Code formatting
 - **Git & Github** - Version control and collaboration
+- **Postman** - API Testing
+- **Github Actions** - For automated testing
 
 ### API Features:
 
 - **RESTful Architecture** - Standard HTTP methods (GET, POST, PUT, DELETE)
 - **JSON Data Exchange** - Structured data communication
 - **Error handling** - Comprehensive error responses and validation
+- **Custom middleware** - For authentication
 - **CORS support** - Cross-origin resource sharing for frontend integration
 
 ## Key Learning Objectives
@@ -62,4 +77,7 @@ This project demonstrates proficiency in:
 - Database design and management with MongoDB
 - RESTful API design principles
 - Error handling and data validation
+- Server Architecture & Organization
+- Database Integration
+- Authentication & Authorization
 - Code organization following industry best practices
