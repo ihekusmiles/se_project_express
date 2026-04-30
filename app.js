@@ -1,21 +1,15 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
+const cors = require("cors");
 
 const app = express();
 const PORT = 3001;
 
-app.use(express.json());
-// This middleware adds a user object to each request:
-// Before middleware: req = { body: {...}, params: {...} }
-// After middleware:  req = { body: {...}, params: {...}, user: { _id: '...' } }
-app.use((req, res, next) => {
-  req.user = {
-    _id: "69a9d77c00ae180eb21dddf4",
-  };
-  next();
-});
-app.use("/", mainRouter);
+// Remember that CORS blocks unauthorized origins immediately
+app.use(cors()); //CORS middleware should be placed first.
+app.use(express.json()); // Parse the request body second.
+app.use("/", mainRouter); // Route to the right handler last.
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")

@@ -3,6 +3,7 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
+  FORBIDDEN_ERROR,
 } = require("../utils/errors");
 
 // Get items
@@ -32,23 +33,29 @@ module.exports.createItem = (req, res) => {
     });
 };
 
-// Delete item
+// Delete item; only user can delete their own items.
 module.exports.deleteItem = (req, res) => {
   const { itemId } = req.params;
-  ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then(() =>
-      res.status(200).send({
-        message: "Item has been successfully deleted",
-      })
-    )
-    .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        // When a valid ObjectID doesn't exist in the database
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "Id not found in database" });
+  const currentUserId = req.user._id; // users id
+
+  ClothingItem.findById(itemId)
+    .then((item) => {
+      // If item doesn't exist
+      if (!item) {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
+      // Checking if current user owns this item. ObjectIds need string conversion.
+      if (item.owner.toString() !== currentUserId) {
+        return res.status(FORBIDDEN_ERROR).send({ message: "Access denied" });
+      }
+      // User owns the item, proceed with deletion
+      return ClothingItem.findByIdAndDelete(itemId).then(() => {
+        res.status(200).send({
+          message: "Item has been successfully deteted",
+        });
+      });
+    })
+    .catch((err) => {
       if (err.name === "CastError") {
         // When an invalid ObjectId format is provided
         return res

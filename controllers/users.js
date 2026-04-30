@@ -24,8 +24,8 @@ module.exports.getUsers = (req, res) => {
 };
 
 // findById()
-module.exports.getUser = (req, res) => {
-  const id = req.params.userId;
+module.exports.getCurrentUser = (req, res) => {
+  const id = req.user._id;
   User.findById(id)
     .orFail()
     .then((user) => res.status(200).send({ user }))
@@ -57,7 +57,11 @@ module.exports.createUser = (req, res) => {
     .hash(password, 10)
     .then((hash) =>
       User.create({ name, avatar, email, password: hash })
-        .then((user) => res.status(201).send({ user }))
+        .then((user) => {
+          const userObject = user.toObject(); // convert Mongoose Document to JS object
+          delete userObject.password; // Removing password from response obj
+          res.status(201).send(userObject);
+        })
         .catch((err) => {
           console.error(err); // Log error to terminal
           if (err.code === 11000) {
@@ -80,7 +84,7 @@ module.exports.createUser = (req, res) => {
     });
 };
 
-// Login
+// Login: findUserByCrendentials() custom method
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
@@ -100,7 +104,39 @@ module.exports.login = (req, res) => {
     .catch((err) => {
       // authentication error
       res
-        .status(UNAUTHORIZED_ERROR)
+        .status(BAD_REQUEST)
         .send({ message: "An authentication error on the server." });
+    });
+};
+
+// Update user's name and avatar only and enable validators
+module.exports.updateUser = (req, res) => {
+  const id = req.user._id;
+  const { name, avatar } = req.body;
+  User.findByIdAndUpdate(
+    id,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
+    .orFail()
+    .then((user) => res.status(200).send({ user }))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST).send({ message: "Validation failed" });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(NOT_FOUND)
+          .send({ message: "ID not found in database" });
+      }
+      if (err.name === "CastError") {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid ID format request" });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occured on the server." });
     });
 };

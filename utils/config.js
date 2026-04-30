@@ -1,1 +1,2 @@
-const JWT_SECRET = "A7HDNij8iJAK9KI*B^MuIKhJy&6@";
+const JWT_SECRET = "123codingx";
+module.exports = JWT_SECRET;
