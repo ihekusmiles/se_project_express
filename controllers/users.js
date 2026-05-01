@@ -6,6 +6,7 @@ const {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   CONFLICT_ERROR,
+  UNAUTHORIZED_ERROR,
 } = require("../utils/errors");
 const JWT_SECRET = require("../utils/config");
 
@@ -79,7 +80,7 @@ module.exports.createUser = (req, res) => {
         })
     )
     .catch((err) => {
-      res.status(BAD_REQUEST).send(err);
+      res.status(BAD_REQUEST).send({ message: "Validation failed" });
     });
 };
 
@@ -87,7 +88,13 @@ module.exports.createUser = (req, res) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  // Using custom method to authenticate
+  // Validate login input before attempting authentication
+  if (!email || !password) {
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "Email and password are required" });
+    // Using custom method to authenticate
+  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
@@ -103,8 +110,8 @@ module.exports.login = (req, res) => {
     .catch(() => {
       // authentication error
       res
-        .status(BAD_REQUEST)
-        .send({ message: "An authentication error on the server." });
+        .status(UNAUTHORIZED_ERROR)
+        .send({ message: "Incorrect email or password" });
     });
 };
 
@@ -136,6 +143,6 @@ module.exports.updateUser = (req, res) => {
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occured on the server." });
+        .send({ message: "An error has occurred on the server." });
     });
 };

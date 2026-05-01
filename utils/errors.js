@@ -1,5 +1,5 @@
 const BAD_REQUEST = 400; // For invalid data
-const UNAUTHORIZED_ERROR = 401; // lacks valid authentication credentials
+const UNAUTHORIZED_ERROR = 401; // lacks valid authentication credentials (Authentication failure)
 const FORBIDDEN_ERROR = 403; // Authenticated but not authorized to perform action
 const NOT_FOUND = 404; // For items not found
 const CONFLICT_ERROR = 409; // For duplicated emails
