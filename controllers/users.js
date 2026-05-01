@@ -79,7 +79,7 @@ module.exports.createUser = (req, res) => {
             .send({ message: "An error has occurred on the server." });
         })
     )
-    .catch((err) => {
+    .catch(() => {
       res.status(BAD_REQUEST).send({ message: "Validation failed" });
     });
 };
