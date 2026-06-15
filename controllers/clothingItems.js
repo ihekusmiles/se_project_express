@@ -1,40 +1,34 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-  FORBIDDEN_ERROR,
-} = require("../utils/errors");
+
+// Import custom error constructors using default export in CommonJS (no {})
+const NotFoundError = require("../errors/not-found-err");
+const BadRequestError = require("../errors/bad-request");
+const ForbiddenError = require("../errors/forbidden-error");
 
 // Get items
-module.exports.getItems = (req, res) => {
+module.exports.getItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch(() => {
-      res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
-    });
+    .catch(next);
 };
 
 // Create item
-module.exports.createItem = (req, res) => {
+module.exports.createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => res.status(201).send({ item }))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Validation failed" });
+        next(new BadRequestError("Validation failed"));
+      } else {
+        next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
     });
 };
 
 // Delete item; only user can delete their own items.
-module.exports.deleteItem = (req, res) => {
+module.exports.deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   const currentUserId = req.user._id; // users id
 
@@ -42,35 +36,33 @@ module.exports.deleteItem = (req, res) => {
     .then((item) => {
       // If item doesn't exist
       if (!item) {
-        return res.status(NOT_FOUND).send({ message: "Item not found" });
+        throw new NotFoundError("Item does not exist");
       }
       // Checking if current user owns this item. ObjectIds need string conversion.
       if (item.owner.toString() !== currentUserId) {
-        return res.status(FORBIDDEN_ERROR).send({ message: "Access denied" });
-      }
-      // User owns the item, proceed with deletion
-      return ClothingItem.findByIdAndDelete(itemId).then(() => {
-        res.status(200).send({
-          message: "Item has been successfully deleted",
+        next(new ForbiddenError("Access denied"));
+      } else {
+        // User owns the item, proceed with deletion
+        return ClothingItem.findByIdAndDelete(itemId).then(() => {
+          res.status(200).send({
+            message: "Item has been successfully deleted",
+          });
         });
-      });
+      }
     })
     .catch((err) => {
       if (err.name === "CastError") {
         // When an invalid ObjectId format is provided
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid Id format request" });
+        next(new BadRequestError("Invalid Id format request"));
+      } else {
+        // For all other errors do default server error
+        next(err);
       }
-      // For all other errors do default server error
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
     });
 };
 
 // Like an item
-module.exports.likeItem = (req, res) => {
+module.exports.likeItem = (req, res, next) => {
   const id = req.params.itemId;
   ClothingItem.findByIdAndUpdate(
     id,
@@ -81,23 +73,17 @@ module.exports.likeItem = (req, res) => {
     .then((like) => res.status(200).send({ like }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "Id not found in database" });
+        next(new NotFoundError("Id not found in database"));
+      } else if (err.name === "CastError") {
+        next(new BadRequestError("Invalid Id format request"));
+      } else {
+        return next(err);
       }
-      if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid Id format request" });
-      }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
     });
 };
 
 // Dislike an item
-module.exports.dislikeItem = (req, res) => {
+module.exports.dislikeItem = (req, res, next) => {
   const id = req.params.itemId;
   ClothingItem.findByIdAndUpdate(
     id,
@@ -108,17 +94,11 @@ module.exports.dislikeItem = (req, res) => {
     .then((dislike) => res.status(200).send({ dislike }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "Id not found in database" });
+        next(new NotFoundError("Id not found in database"));
+      } else if (err.name === "CastError") {
+        next(new BadRequestError("Invalid Id format request"));
+      } else {
+        return next(err);
       }
-      if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid Id format request" });
-      }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
     });
 };

@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const mainRouter = require("./routes/index");
+const errorHandler = require("./middlewares/error-handler");
+const { errors } = require("celebrate");
 
 const app = express();
 const PORT = 3001;
@@ -10,6 +12,13 @@ const PORT = 3001;
 app.use(cors()); // CORS middleware should be placed FIRST.
 app.use(express.json()); // Parse the request body SECOND.
 app.use("/", mainRouter); // Route to the right handler LAST.
+
+// celebrate error handler
+app.use(errors());
+
+// Centralized error handling
+
+app.use(errorHandler);
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")

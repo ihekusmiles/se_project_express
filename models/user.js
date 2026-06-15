@@ -11,10 +11,11 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    required: true,
+    // Validating avatar URL (value) if it exists,
+    // if not then return true (skip validation)
     validate: {
       validator(value) {
-        return validator.isURL(value);
+        return value ? validator.isURL(value) : true;
       },
       message: "You must enter a valid URL",
     },
