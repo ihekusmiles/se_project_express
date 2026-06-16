@@ -1,57 +1,45 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-  CONFLICT_ERROR,
-  UNAUTHORIZED_ERROR,
-} = require("../utils/errors");
+
+// Import custom error constructors
+const NotFoundError = require("../errors/not-found-err");
+const BadRequestError = require("../errors/bad-request");
+const ConflictError = require("../errors/conflict-error");
+const UnauthorizedError = require("../errors/unauthorized-error");
+
 const JWT_SECRET = require("../utils/config");
 
 // controller functions/methods or Route handlers:
 // find()
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err); // Log error to terminal
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
-    });
+    .catch(next);
 };
 
 // findById()
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   const id = req.user._id;
   User.findById(id)
     .orFail()
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      console.error(err); // Log error to terminal
       if (err.name === "DocumentNotFoundError") {
         // When a valid ObjectId doesn't exist in the database
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "Id not found in database" });
-      }
-      if (err.name === "CastError") {
+        next(new NotFoundError("Id not found in database"));
+      } else if (err.name === "CastError") {
         // When an invalid ObjectId format is provided
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid Id format request" });
+        next(new BadRequestError("Invalid Id format request"));
+      } else {
+        // For all other errors default server error
+        return next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
-      // Default server error
     });
 };
 
 // create()
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   bcrypt
     .hash(password, 10)
@@ -63,36 +51,26 @@ module.exports.createUser = (req, res) => {
           res.status(201).send(userObject);
         })
         .catch((err) => {
-          console.error(err); // Log error to terminal
           if (err.code === 11000) {
-            return res
-              .status(CONFLICT_ERROR)
-              .send({ message: "Email conflict error" });
+            return next(new ConflictError("Email conflict error"));
+          } else if (err.name === "ValidationError") {
+            return next(new BadRequestError("Validation failed"));
+          } else {
+            return next(err);
           }
-          if (err.name === "ValidationError") {
-            return res
-              .status(BAD_REQUEST)
-              .send({ message: "Validation failed" });
-          }
-          return res
-            .status(INTERNAL_SERVER_ERROR)
-            .send({ message: "An error has occurred on the server." });
         })
     )
-    .catch(() => {
-      res.status(BAD_REQUEST).send({ message: "Validation failed" });
+    .catch((err) => {
+      return next(err);
     });
 };
 
 // Login: findUserByCrendentials() custom method
-
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   // Validate login input before attempting authentication
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Email and password are required" });
+    return next(new BadRequestError("Email and password are required"));
     // Using custom method to authenticate
   }
   return User.findUserByCredentials(email, password)
@@ -109,14 +87,12 @@ module.exports.login = (req, res) => {
     })
     .catch(() => {
       // authentication error
-      res
-        .status(UNAUTHORIZED_ERROR)
-        .send({ message: "Incorrect email or password" });
+      next(new UnauthorizedError("Incorrect email or password"));
     });
 };
 
 // Update user's name and avatar only and enable validators
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const id = req.user._id;
   const { name, avatar } = req.body;
   User.findByIdAndUpdate(
@@ -127,22 +103,13 @@ module.exports.updateUser = (req, res) => {
     .orFail()
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Validation failed" });
+        return next(new BadRequestError("Validation failed"));
+      } else if (err.name === "DocumentNotFoundError") {
+        return next(new NotFoundError("ID not found in database"));
+      } else if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid ID format request"));
       }
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: "ID not found in database" });
-      }
-      if (err.name === "CastError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid ID format request" });
-      }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
