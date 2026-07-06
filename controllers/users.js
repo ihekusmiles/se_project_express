@@ -8,7 +8,7 @@ const BadRequestError = require("../errors/bad-request");
 const ConflictError = require("../errors/conflict-error");
 const UnauthorizedError = require("../errors/unauthorized-error");
 
-const JWT_SECRET = require("../utils/config");
+const { JWT_SECRET } = require("../utils/config");
 
 // controller functions/methods or Route handlers:
 // find()
