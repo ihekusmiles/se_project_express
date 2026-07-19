@@ -9,13 +9,22 @@ const { errors } = require("celebrate");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 const app = express();
-const PORT = 3001;
 
+// use process.env port, otherwise default to 3001
+const { PORT = 3001 } = process.env;
 // Enable request logger before all route handlers
 app.use(requestLogger);
 
 // Remember that CORS blocks unauthorized origins immediately
-app.use(cors()); // CORS middleware should be placed FIRST.
+app.use(
+  cors({
+    origin: [
+      "https://www.weatherwear.twilightparadox.com",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+  })
+); // CORS middleware should be placed FIRST.
 app.use(express.json()); // Parse the request body SECOND.
 app.use("/", mainRouter); // Route to the right handler LAST.
 
