@@ -19,12 +19,20 @@ app.use(requestLogger);
 app.use(
   cors({
     origin: [
-      "https://www.weatherwear.twilightparadox.com",
+      "https://weatherwear.twilightparadox.com",
       "http://localhost:3000",
     ],
     credentials: true,
   })
 ); // CORS middleware should be placed FIRST.
+
+// Setting up server crash testing
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
 app.use(express.json()); // Parse the request body SECOND.
 app.use("/", mainRouter); // Route to the right handler LAST.
 
