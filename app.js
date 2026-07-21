@@ -20,6 +20,7 @@ app.use(
   cors({
     origin: [
       "https://weatherwear.twilightparadox.com",
+      "https://www.weatherwear.twilightparadox.com",
       "http://localhost:3000",
     ],
     credentials: true,
