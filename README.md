@@ -4,6 +4,7 @@ A RESTful API backend for a weather-based clothing recommendation application. T
 
 ## Overview
 
+- Repository Links
 - Project Pitch Video
 - Running the Project
 - Project description
@@ -11,10 +12,17 @@ A RESTful API backend for a weather-based clothing recommendation application. T
 - Technologies used
 - Key learning objectives
 
+## Repository Links
+
+- Deployed project's domain name: weatherwear.twilightparadox.com
+
+- [Frontend Repository link to the project](https://github.com/ihekusmiles/se_project_react)
+
+- [Backend Repository link to the project](https://github.com/ihekusmiles/se_project_express)
+
 ## Project Pitch Video
 
-Check out [this video](https://www.loom.com/share/de41513c51ce47448b8de861cd8599af), where I describe my
-project, the steps I took to build the backend of the WTRW app, a challenge I faced while building it, and the lessons I learned from it.
+Check out [this video](https://www.loom.com/share/ce9aad96f17c4ee9acedeb166749392b) where I describe and showcase the fullstack project and explain some technologies used.
 
 ## Running the Project
 
