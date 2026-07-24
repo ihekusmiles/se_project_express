@@ -1,20 +1,23 @@
 require("dotenv").config();
-
 const express = require("express");
 const mongoose = require("mongoose");
+const { errors } = require("celebrate");
 const cors = require("cors");
+const helmet = require("helmet");
+const { limiter } = require("./middlewares/rateLimiter");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
-const { errors } = require("celebrate");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
-
 const app = express();
 
 // use process.env port, otherwise default to 3001
 const { PORT = 3001 } = process.env;
 // Enable request logger before all route handlers
 app.use(requestLogger);
-
+// Place helmet before cors as a convention
+app.use(helmet());
+// Enable limiter
+app.use(limiter);
 // Remember that CORS blocks unauthorized origins immediately
 app.use(
   cors({
@@ -25,7 +28,7 @@ app.use(
     ],
     credentials: true,
   })
-); // CORS middleware should be placed FIRST.
+); // CORS middleware should be placed first, but if using 'helmet' place after.
 
 // Setting up server crash testing
 app.get("/crash-test", () => {

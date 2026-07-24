@@ -40,24 +40,22 @@ module.exports.deleteItem = (req, res, next) => {
       }
       // Checking if current user owns this item. ObjectIds need string conversion.
       if (item.owner.toString() !== currentUserId) {
-        next(new ForbiddenError("Access denied"));
-      } else {
-        // User owns the item, proceed with deletion
-        return ClothingItem.findByIdAndDelete(itemId).then(() => {
-          res.status(200).send({
-            message: "Item has been successfully deleted",
-          });
-        });
+        return next(new ForbiddenError("Access denied"));
       }
+      // User owns the item, proceed with deletion
+      return ClothingItem.findByIdAndDelete(itemId).then(() => {
+        res.status(200).send({
+          message: "Item has been successfully deleted",
+        });
+      });
     })
     .catch((err) => {
       if (err.name === "CastError") {
         // When an invalid ObjectId format is provided
-        next(new BadRequestError("Invalid Id format request"));
-      } else {
-        // For all other errors do default server error
-        next(err);
+        return next(new BadRequestError("Invalid Id format request"));
       }
+      // For all other errors do default server error
+      return next(err);
     });
 };
 
@@ -73,12 +71,12 @@ module.exports.likeItem = (req, res, next) => {
     .then((like) => res.status(200).send({ like }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        next(new NotFoundError("Id not found in database"));
-      } else if (err.name === "CastError") {
-        next(new BadRequestError("Invalid Id format request"));
-      } else {
-        return next(err);
+        return next(new NotFoundError("Id not found in database"));
       }
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid Id format request"));
+      }
+      return next(err);
     });
 };
 
@@ -94,11 +92,11 @@ module.exports.dislikeItem = (req, res, next) => {
     .then((dislike) => res.status(200).send({ dislike }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        next(new NotFoundError("Id not found in database"));
-      } else if (err.name === "CastError") {
-        next(new BadRequestError("Invalid Id format request"));
-      } else {
-        return next(err);
+        return next(new NotFoundError("Id not found in database"));
       }
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid Id format request"));
+      }
+      return next(err);
     });
 };
