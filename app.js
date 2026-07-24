@@ -8,6 +8,7 @@ const { limiter } = require("./middlewares/rateLimiter");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
+
 const app = express();
 
 // use process.env port, otherwise default to 3001
